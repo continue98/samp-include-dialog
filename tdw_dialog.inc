@@ -174,6 +174,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			do {
 				if (inputtext[len] == '%')
 					inputtext[len] = '#';
+				else if (len > len - 2) {
+					if (
+						inputtext[len] == '~' && 
+						inputtext[len - 1] == 'k' && 
+						inputtext[len - 2] == '~'
+					) {
+						inputtext[len] = '#';
+						inputtext[len - 1] = '#';
+						inputtext[len - 2] = '#';
+					}
+				}
 			} while (--len != 0);
 
 			return CallLocalFunction(TDW_gsDialogName[playerid], !"ddds",
