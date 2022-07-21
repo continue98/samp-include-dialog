@@ -89,7 +89,7 @@
 #define Dialog_Show ShowDialog
 #define dfunc: #
 
-#if !defined _INC_SAMP_Community_fixes && !defined FIX_const
+#if !defined _INC_SAMP_Community_fixes && !defined FIX_const && !defined SAMP_CONST_CORRECT
 	native TDW_DIALOG_ShowPlayerDialog(playerid, dialogid, style,
 		const caption[], const info[], const button1[],
 		const button2[]) = ShowPlayerDialog;
