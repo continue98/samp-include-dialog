@@ -110,13 +110,23 @@
 const
 	TDW_DIALOG_MAX_FUNC_NAME = 32;
 
+
+static stock bool: tdw_IsDialogList(const style_id);
+
 static stock
 	TDW_gsDialogName[MAX_PLAYERS][TDW_DIALOG_MAX_FUNC_NAME char],
+	TDW_gnDialogCountItem[MAX_PLAYERS] = { -1, -1, -1, ... },
+	TDW_gnDialogStyleId[MAX_PLAYERS] = { -1, -1, -1, ... },
 	bool:TDW_gsDialogOpened[MAX_PLAYERS char];
 
 stock OpenDialog(playerid, const func[], style,	const caption[], const info[],
 	const button1[], const button2[])
 {
+	if (tdw_IsDialogList(style)) {
+		TDW_gnDialogCountItem[playerid] = tdw_strcnt(info, "\n");
+	}
+
+	TDW_gnDialogStyleId[playerid] = style;
 	TDW_gsDialogName[playerid] = !"D_";
 	strcat(TDW_gsDialogName[playerid], func);
 
@@ -165,6 +175,20 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		if (_:TDW_gsDialogOpened{playerid} == 0)
 			return 0;
 		TDW_gsDialogOpened{playerid} = false;
+
+		new 
+			count_items = TDW_gnDialogCountItem[playerid],
+			style_id = TDW_gnDialogStyleId[playerid];
+		
+		TDW_gnDialogStyleId[playerid] = -1;
+		TDW_gnDialogCountItem[playerid] = -1;
+
+		if (tdw_IsDialogList(style_id)) {
+			if (!(0 <= listitem <= count_items)) {
+				// dialog spoofing detected
+				return 0;
+			}
+		}
 
 		if (inputtext[0] == '\0') {
 			return CallLocalFunction(TDW_gsDialogName[playerid], !"ddds",
@@ -215,3 +239,29 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		inputtext[]);
 	#endif
 #endif
+
+// Counts the number of matches. Returns the number of matches.
+static stock tdw_strcnt(const src[], const sub[], bool:ignorecase=false)
+{
+	new
+		last_pos,
+		cnt,
+		sub_length = strlen(sub);
+
+	if (sub{0} != 0) {
+		sub_length *= (cellbits / charbits);
+	}
+
+	while ((last_pos = strfind(src, sub, ignorecase, last_pos)) >= 0)
+	{
+		last_pos += sub_length;
+		cnt++;
+	}
+
+	return cnt;
+}
+
+// Checks if style id is an entity of the list (DIALOG_STYLE_LIST/DIALOG_STYLE_TABLIST/DIALOG_STYLE_TABLIST_HEADERS)
+static stock bool: tdw_IsDialogList(const style_id) {
+	return style_id == DIALOG_STYLE_LIST || style_id == DIALOG_STYLE_TABLIST || style_id == DIALOG_STYLE_TABLIST_HEADERS;
+}
